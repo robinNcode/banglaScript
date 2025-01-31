@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import MonacoEditor from '@monaco-editor/react';
 import transpileBanglaScript from '../parser';
+import { CiPlay1 } from "react-icons/ci";
 
 const Home: React.FC = () => {
   const [editorValue, setEditorValue] = useState<string>('console.log("Hello World!");');
+  const [finalOutput, getOutput] = useState<string>('');
 
   const handleEditorChange = (value: string | undefined) => {
     if (value) {
@@ -12,57 +14,75 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleRun = () => {
     try {
       const tsCode = transpileBanglaScript(editorValue);
-      console.log("Generated TypeScript Code:\n", tsCode);
+      let output = "";
+
+      // Override console.log to capture output
+      const originalConsoleLog = console.log;
+      console.log = (msg) => {
+        output += msg + "\n";
+      };
+
+      const fn = new Function(tsCode);
+      fn(); // Execute the function
+
+      // Restore console.log
+      console.log = originalConsoleLog;
+
+      // Set captured output
+      getOutput(output);
     }
-    catch (error) {
+    catch (error: any) {
       console.error(error);
+      getOutput("Error: " + error.message);
     }
   };
 
   return (
-    <Container fluid className="my-5">
-      <Row>
-        <Col xs={8} md={8} className="position-relative">
-          <Card className="h-100">
-            <Card.Body className="position-relative">
-              <Card.Title>
-                <h2>Bangla Script</h2>
-              </Card.Title>
-
-              {/* Monaco Editor */}
-              <MonacoEditor
-                height="400px"
-                language="javascript"
-                value={editorValue}
-                onChange={handleEditorChange}
-                theme="vs-dark"
-                options={{
-                  wordWrap: "on",
-                  wrappingIndent: "indent",
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                }}
-              />
-
-              {/* Save Button */}
-              <div className="position-absolute top-0 end-0 p-3">
-                <Button variant="primary" onClick={handleSave}>
-                  Save Code
-                </Button>
-              </div>
-            </Card.Body>
-          </Card>
+    <Container fluid>
+      {/* Header Row */}
+      <Row className="mb-4">
+        <Col md={2}>
+          <h2>Bangla Script</h2>
         </Col>
+        <Col md={1}>
+          <Button variant="primary" onClick={handleRun}>
+            <CiPlay1 /> Run
+          </Button>
+        </Col>
+        <Col md={9}>
+          <Button variant="secondary" onClick={() => setEditorValue('')}>
+            Clear Editor
+          </Button>
+        </Col>
+      </Row>
 
-        {/* Code Preview Column */}
-        <Col xs={4} md={4}>
-          <Card>
-            <Card.Body>
-              <Card.Title>Code Preview</Card.Title>
-              <pre>{editorValue}</pre>
+      {/* Editor and Preview Rows */}
+      <Row className="mb-1">
+        <Col>
+          {/* Monaco Editor */}
+          <MonacoEditor
+            height="350px"
+            language="javascript"
+            value={editorValue}
+            onChange={handleEditorChange}
+            theme="vs-dark"
+            options={{
+              wordWrap: "on",
+              wrappingIndent: "indent",
+              lineNumbers: "on",
+              scrollBeyondLastLine: false,
+            }}
+          />
+        </Col>
+      </Row>
+      <Row className="m-2">
+        <Col className="bg-dark">
+          <Card className="bg-dark">
+            <Card.Body className="bg-dark text-light h-100">
+              <pre>{finalOutput}</pre>
             </Card.Body>
           </Card>
         </Col>
