@@ -3,7 +3,7 @@ import * as ohm from 'ohm-js';
 const banglaGrammar = `
   BanglaScript {
     Program = Statement*
-    Statement = "লিখ" "(" string ")" ";"  -- print
+    Statement = "লিখো" "(" string ")" ";"  -- print
     string = "\\"" (~"\\"" any)* "\\""
   }
 `;
@@ -21,7 +21,7 @@ semantics.addOperation('toTS()', {
   Program(statements) {
     return statements.children.map((s) => s.toTS()).join("\n");
   },
-  Statement_print(_, str, __) {
+  Statement_print(_write, _openParen, str, _closeParen, _semicolon) {
     return `console.log(${str.toTS()});`;
   },
   string(_open, chars, _close) {
@@ -33,22 +33,10 @@ semantics.addOperation('toTS()', {
  * Function to transpile BanglaScript code to TypeScript
  * @param code - BanglaScript code
  */
-export function transpileBanglaScript(code: string): string {
+export default function transpileBanglaScript(code: string): string {
   const matchResult = BanglaScript.match(code);
   if (matchResult.failed()) {
     throw new Error("Syntax Error: " + matchResult.message);
   }
   return semantics(matchResult).toTS();
-}
-
-/**
- * Parse the input code
- */
-
-const banglaCode = 'লিখ("আমি বাংলায় গান গাই")';
-try {
-  const tsCode = transpileBanglaScript(banglaCode);
-  console.log("Generated TypeScript Code:\n", tsCode);
-} catch (error) {
-  console.error(error);
 }
