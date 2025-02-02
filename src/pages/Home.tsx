@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Container, Row, Col, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import MonacoEditor from '@monaco-editor/react';
 import transpileBanglaScript from '../parser';
-import { CiPlay1 } from "react-icons/ci";
+
+// Images and Icons
+import { CiPlay1, CiUndo } from "react-icons/ci";
 import horizontalLogo from "../../public/images/bs_horizontal_logo.png";
 
 const Home: React.FC = () => {
@@ -42,25 +44,25 @@ const Home: React.FC = () => {
   };
 
   return (
-    <Container fluid>
+    <Container className="mt-2">
       {/* Header Row */}
-      <Row>
+      <Row className="mb-2">
         <Col md={6}>
-          <img className="horizontal-logo" src={horizontalLogo} />
+          <img className="horizontal-logo" src={horizontalLogo}  alt="Bangla Script Logo"/>
           <span>Bangla Script: A programming Language</span>
         </Col>
         <Col md={6} className='d-flex flex-row-reverse'>
-          <Button variant="primary" onClick={handleRun}>
+          <Button className="m-2" variant="primary" onClick={handleRun}>
             <CiPlay1 /> Run
           </Button>
-          <Button variant="secondary" onClick={() => setEditorValue('')}>
-            Clear Editor
+          <Button className="m-2" variant="secondary" onClick={() => setEditorValue('')}>
+            <CiUndo /> Clear
           </Button>
         </Col>
       </Row>
 
       {/* Editor and Preview Rows */}
-      <Row className="mb-1">
+      <Row className="mb-2">
         <Col>
           {/* Monaco Editor */}
           <MonacoEditor
@@ -78,13 +80,9 @@ const Home: React.FC = () => {
           />
         </Col>
       </Row>
-      <Row className="m-2">
+      <Row className="mt-2">
         <Col className="bg-dark">
-          <Card className="bg-dark">
-            <Card.Body className="bg-dark text-light h-100">
-              <pre>{finalOutput}</pre>
-            </Card.Body>
-          </Card>
+          <pre>{finalOutput}</pre>
         </Col>
       </Row>
     </Container>

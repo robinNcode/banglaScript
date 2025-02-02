@@ -1,13 +1,18 @@
-body, html {
+html, body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh; /* Ensures it fills the viewport */
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
+
 
 .horizontal-logo{
   height: 4rem;
