@@ -3,6 +3,7 @@ import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import MonacoEditor from '@monaco-editor/react';
 import transpileBanglaScript from '../parser';
 import { CiPlay1 } from "react-icons/ci";
+import horizontalLogo from "../../public/images/bs_horizontal_logo.png";
 
 const Home: React.FC = () => {
   const [editorValue, setEditorValue] = useState<string>('console.log("Hello World!");');
@@ -43,16 +44,15 @@ const Home: React.FC = () => {
   return (
     <Container fluid>
       {/* Header Row */}
-      <Row className="mb-4">
-        <Col md={2}>
-          <h2>Bangla Script</h2>
+      <Row>
+        <Col md={6}>
+          <img className="horizontal-logo" src={horizontalLogo} />
+          <span>Bangla Script: A programming Language</span>
         </Col>
-        <Col md={1}>
+        <Col md={6} className='d-flex flex-row-reverse'>
           <Button variant="primary" onClick={handleRun}>
             <CiPlay1 /> Run
           </Button>
-        </Col>
-        <Col md={9}>
           <Button variant="secondary" onClick={() => setEditorValue('')}>
             Clear Editor
           </Button>
