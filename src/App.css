@@ -8,3 +8,8 @@ body, html {
   margin: 0;
   padding: 0;
 }
+
+.horizontal-logo{
+  height: 4rem;
+  width: auto;
+}

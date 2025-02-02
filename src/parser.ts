@@ -3,7 +3,7 @@ import * as ohm from 'ohm-js';
 const banglaGrammar = `
   BanglaScript {
     Program = Statement*
-    Statement = "লিখো" "(" string ")" ";"  -- print
+    Statement = "দেখাও" "(" string ")" ";"  -- print
     string = "\\"" (~"\\"" any)* "\\""
   }
 `;
