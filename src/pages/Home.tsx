@@ -5,7 +5,7 @@ import transpileBanglaScript from '../parser';
 
 // Images and Icons
 import { CiPlay1, CiUndo } from "react-icons/ci";
-import horizontalLogo from "../../public/images/bs_horizontal_logo.png";
+import horizontalLogo from "../assets/images/bs_horizontal_logo.png";
 
 const Home: React.FC = () => {
   const [editorValue, setEditorValue] = useState<string>('console.log("Hello World!");');
@@ -49,7 +49,7 @@ const Home: React.FC = () => {
       <Row className="mb-2">
         <Col md={6}>
           <img className="horizontal-logo" src={horizontalLogo}  alt="Bangla Script Logo"/>
-          <span>Bangla Script: A programming Language</span>
+          <span>Bangla Script: A Bengali Programming Language</span>
         </Col>
         <Col md={6} className='d-flex flex-row-reverse'>
           <Button className="m-2" variant="primary" onClick={handleRun}>
@@ -63,10 +63,10 @@ const Home: React.FC = () => {
 
       {/* Editor and Preview Rows */}
       <Row className="mb-2">
-        <Col>
+        <Col md={8}>
           {/* Monaco Editor */}
           <MonacoEditor
-            height="350px"
+            height="80vh"
             language="javascript"
             value={editorValue}
             onChange={handleEditorChange}
@@ -79,9 +79,7 @@ const Home: React.FC = () => {
             }}
           />
         </Col>
-      </Row>
-      <Row className="mt-2">
-        <Col className="bg-dark">
+        <Col md={4} className="bg-dark text-light">
           <pre>{finalOutput}</pre>
         </Col>
       </Row>
