@@ -1,0 +1,20 @@
+BanglaScript {
+  Program = Statement*
+
+  Statement =
+      ConsoleLogStatement   -- console
+    | VariableDeclaration   -- var
+    | FunctionDeclaration   -- func
+    | FunctionCall          -- funcCall
+    | IfElseStatement       -- ifElse
+    | LoopStatement         -- loop
+    | ClassDeclaration      -- class
+
+  # Importing other grammar files
+  include console
+  include variables
+  include functions
+  include conditionals
+  include loops
+  include oop
+}

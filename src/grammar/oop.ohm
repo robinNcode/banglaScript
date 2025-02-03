@@ -1,0 +1,4 @@
+oop {
+  ClassDeclaration = "শ্রেণি" identifier "{" ClassBody "}"
+  ClassBody = (FunctionDeclaration | VariableDeclaration)*
+}

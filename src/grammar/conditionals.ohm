@@ -1,0 +1,41 @@
+semantics.addOperation('toTS()', {
+  Program(statements) {
+    return statements.children.map((s) => s.toTS()).join("\n");
+  },
+
+  PrintStatement(_write, _openParen, str, _closeParen, _semicolon) {
+    return `console.log(${str.toTS()});`;
+  },
+
+  IfStatement_if(_if, _open, condition, _close, block) {
+    return `if (${condition.toTS()}) ${block.toTS()}`;
+  },
+
+  IfStatement_elseIf(_if, _open, condition, _close, block, _elseIf, elseIfStatement) {
+    return `if (${condition.toTS()}) ${block.toTS()} else ${elseIfStatement.toTS()}`;
+  },
+
+  IfStatement_else(_if, _open, condition, _close, block, _else, elseBlock) {
+    return `if (${condition.toTS()}) ${block.toTS()} else ${elseBlock.toTS()}`;
+  },
+
+  Block(_open, statements, _close) {
+    return `{\n${statements.children.map((s) => s.toTS()).join("\n")}\n}`;
+  },
+
+  Expression_true(_) {
+    return "true";
+  },
+
+  Expression_false(_) {
+    return "false";
+  },
+
+  string(_open, chars, _close) {
+    return `"${chars.sourceString}"`;
+  },
+
+  number(digits) {
+    return digits.sourceString;
+  }
+});

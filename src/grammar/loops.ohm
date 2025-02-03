@@ -1,0 +1,6 @@
+loops {
+  LoopStatement =
+      "জন্য" "(" VariableDeclaration ";" Expression ";" Expression ")" "{" Program "}" -- forLoop
+    | "যতক্ষণ" "(" Expression ")" "{" Program "}"                                    -- whileLoop
+    | "করো" "{" Program "}" "যতক্ষণ" "(" Expression ")" ";"                           -- doWhileLoop
+}
