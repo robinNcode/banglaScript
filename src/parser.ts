@@ -1,72 +1,84 @@
 import * as ohm from 'ohm-js';
-import fs from 'fs';
-import path from 'path';
+import { transliterateBangla } from "./utils/transliterate.ts";
 
-// Load grammar from files dynamically
-const grammarPath = path.join(__dirname, 'grammars', 'main.ohm');
-const banglaGrammar = fs.readFileSync(grammarPath, 'utf-8');
+const banglaGrammar = `
+  BanglaScript {
+    Program = Statement*
+    Statement = "দেখাও" "(" string ")" ";"  -- print
+    VariableDeclaration = "ধরি" VarType identifier "=" Expression ";"
+    VarType = "সংখ্যা" | "হাছামিছা" | "দড়ি" | "বিন্যাস" | "সংখ্যা_বিন্যাস" | "দড়ি_বিন্যাস"
+    Expression = number | boolean | string | identifier | ArrayExpression
+    ArrayExpression = "[" ListOf<Expression, ","> "]"
+    identifier = letter (letter | digit | "_")*
+    number = digit+
+    boolean = "সত্য" | "মিথ্যা"
+    string = "\\"" (~"\\"" any)* "\\""
+  }
+`;
 
-// Create the Ohm grammar object
+/**
+ * Create a new BanglaScript grammar
+ */
 const BanglaScript = ohm.grammar(banglaGrammar);
 const semantics = BanglaScript.createSemantics();
 
 /**
- * Define the semantics for transpiling BanglaScript to TypeScript
+ * Define the semantics of the grammar
  */
 semantics.addOperation('toTS()', {
   Program(statements) {
     return statements.children.map((s) => s.toTS()).join("\n");
   },
-  ConsoleLogStatement(_write, _openParen, str, _closeParen, _semicolon) {
+  Statement_print(_write, _openParen, str, _closeParen, _semicolon) {
     return `console.log(${str.toTS()});`;
   },
-  VariableDeclaration(type, name, _eq, value, _semicolon) {
-    const tsType = {
+  VariableDeclaration(_dhori, type, name, _eq, value, _semicolon) {
+    console.log(type.sourceString);
+
+    const tsTypeMap: Record<string, string> = {
       "সংখ্যা": "number",
       "হাছামিছা": "boolean",
-      "দড়ি": "string",
-      "বিন্যাস": "array"
-    }[type.sourceString] || "any";
-    console.log(`ধরি ${name.sourceString}: ${tsType} = ${value.toTS()};`);
-    return `ধরি ${name.sourceString}: ${tsType} = ${value.toTS()};`;
+      "দড়ি": "string",
+      "বিন্যাস": "any[]",
+      "সংখ্যা_বিন্যাস": "number[]",
+      "দড়ি_বিন্যাস": "string[]"
+    };
+
+    // Validate type
+    const typeString = type.sourceString;
+    if (!(typeString in tsTypeMap)) {
+      throw new Error(`ত্রুটি: '${typeString}' কোন বৈধ ডাটা টাইপ নয়!`);
+    }
+
+    // Transliterate Bengali variable name
+    const varName = transliterateBangla(name.sourceString);
+
+    // Validate variable name (must start with a letter or _ and contain only alphanumeric characters or _)
+    if (!varName.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)) {
+      throw new Error(`ত্রুটি: '${name.sourceString}' একটি অবৈধ ভেরিয়েবল নাম! ইংরেজি বর্ণমালা বা "_" ব্যবহার করুন।`);
+    }
+
+    return `let ${varName}: ${tsTypeMap[typeString]} = ${value.toTS()};`;
   },
-  FunctionDeclaration(_func, name, _open, params, _close, _openBody, body, _closeBody) {
-    return `function ${name.sourceString}(${params.toTS()}) {\n${body.toTS()}\n}`;
+  ArrayExpression(_open, elements, _close) {
+    return `[${elements.children.map((e) => e.toTS()).join(", ")}]`;
   },
-  IfElseStatement(_if, _open, condition, _close, _openBody, body, _closeBody) {
-    return `if (${condition.toTS()}) {\n${body.toTS()}\n}`;
+
+  // Fix: Corrected identifier function with proper arity
+  identifier(_first, _rest) {
+    return transliterateBangla(_first.sourceString + _rest.sourceString);
   },
-  LoopStatement_forLoop(_for, _open, init, _semi1, condition, _semi2, increment, _close, _openBody, body, _closeBody) {
-    return `for (${init.toTS()}; ${condition.toTS()}; ${increment.toTS()}) {\n${body.toTS()}\n}`;
+
+  number(value) {
+    return value.sourceString;
   },
-  LoopStatement_whileLoop(_while, _open, condition, _close, _openBody, body, _closeBody) {
-    return `while (${condition.toTS()}) {\n${body.toTS()}\n}`;
+
+  boolean(value) {
+    return value.sourceString === "সত্য" ? "true" : "false";
   },
-  LoopStatement_doWhileLoop(_do, _openBody, body, _closeBody, _while, _open, condition, _close, _semi) {
-    return `do {\n${body.toTS()}\n} while (${condition.toTS()});`;
-  },
-  ClassDeclaration(_class, name, _openBody, body, _closeBody) {
-    return `class ${name.sourceString} {\n${body.toTS()}\n}`;
-  },
+
   string(_open, chars, _close) {
     return `"${chars.sourceString}"`;
-  },
-  identifier(chars) {
-    return chars.sourceString;
-  },
-  number(chars) {
-    return chars.sourceString;
-  },
-  boolean(chars) {
-    if(chars.sourceString === "সত্য") {
-      return "true";
-    }
-    else if(chars.sourceString === "মিথ্যা") {
-      return "false";
-    }
-    else {
-      throw new Error("আপনি ভুল বুলিয়ান মান দিয়েছেন: " + chars.sourceString);
-    }
   }
 });
 

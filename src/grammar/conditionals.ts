@@ -1,5 +1,5 @@
 import * as ohm from 'ohm-js';
-import { transliterateBangla } from "./transliterate.ts";
+import { transliterateBangla } from "../utils/transliterate.ts";
 
 /**
  * Define Ohm grammar for conditional statements in BanglaScript

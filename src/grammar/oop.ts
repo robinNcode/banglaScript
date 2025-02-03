@@ -1,5 +1,5 @@
 import * as ohm from "ohm-js";
-import { transliterateBangla } from "./transliterate";
+import { transliterateBangla } from "../utils/transliterate.ts";
 import transpileVariables from "./variables";  // For variable declaration in OOP
 import transpileStatements from "./statements"; // Importing statements
 import transpileConditionals from "./conditionals"; // Importing conditionals

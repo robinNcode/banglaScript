@@ -1,5 +1,5 @@
 import * as ohm from "ohm-js";
-import { transliterateBangla } from "./transliterate";
+import { transliterateBangla } from "../utils/transliterate.ts";
 
 const loopsGrammar = `
   Loops {
