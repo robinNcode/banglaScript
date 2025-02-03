@@ -1,7 +1,0 @@
-functions {
-  FunctionDeclaration = "ফাংশন" identifier "(" Params? ")" "{" Program "}"
-  Params = identifier ("," identifier)*
-
-  FunctionCall = identifier "(" Arguments? ")" ";"
-  Arguments = Expression ("," Expression)*
-}
