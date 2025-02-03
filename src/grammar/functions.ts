@@ -1,5 +1,6 @@
 import * as ohm from 'ohm-js';
 import { transliterateBangla } from "./transliterate.ts";
+import transpileVariables from "./variables.ts";
 
 /**
  * Define Ohm grammar for function declarations in BanglaScript
@@ -7,7 +8,7 @@ import { transliterateBangla } from "./transliterate.ts";
 const functionGrammar = `
 Functions {
   Program = FunctionDeclaration*
-  FunctionDeclaration = "ফাংশন" identifier "(" ParamList? ")" "{" Statement* "}"
+  FunctionDeclaration = "কাঠামো" identifier "(" ParamList? ")" "{" Statement* "}"
   ParamList = ListOf<Param, ",">
   Param = VarType identifier
   Statement = ReturnStatement | VariableDeclaration
@@ -66,14 +67,7 @@ semantics.addOperation('toTS()', {
   },
 
   VariableDeclaration(_dhori, type, name, _eq, value, _semicolon) {
-    const tsType = getTypeMapping(type.sourceString);
-    const varName = transliterateBangla(name.sourceString);
-
-    if (!varName.match(/^[a-zA-Z_][a-zA-Z0-9_]*$/)) {
-      throw new Error(`ত্রুটি: '${name.sourceString}' একটি অবৈধ ভেরিয়েবল নাম! ইংরেজি বর্ণমালা বা "_" ব্যবহার করুন।`);
-    }
-
-    return `let ${varName}: ${tsType} = ${value.toTS()};`;
+    return transpileVariables(type, name, _eq, value, _semicolon);
   },
 
   ArrayExpression(_open, elements, _close) {

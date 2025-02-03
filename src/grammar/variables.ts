@@ -83,6 +83,7 @@ semantics.addOperation('toTS()', {
     return `"${chars.sourceString}"`;
   }
 });
+
 /**
  * Function to transpile BanglaScript variable declaration to TypeScript
  */
