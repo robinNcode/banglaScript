@@ -1,4 +1,0 @@
-console {
-  ConsoleLogStatement = "দেখাও" "(" string ")" ";"
-  string = "\\"" (~"\\"" any)* "\\""
-}
