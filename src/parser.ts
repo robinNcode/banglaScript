@@ -1,5 +1,5 @@
 import * as ohm from 'ohm-js';
-import { transliterateBangla } from './utils/transliterate';
+import {transliterateBangla} from './utils/transliterate';
 
 // Define the BanglaScript grammar
 const banglaGrammar = `
@@ -8,7 +8,7 @@ const banglaGrammar = `
     Statement = PrintStatement | VariableDeclaration
 
     PrintStatement = "দেখাও" "(" outputString ")" ";"
-    VariableDeclaration = VarKeyword ~" " VarType ~" " identifier ~" " "=" ~" " Expression ";"
+    VariableDeclaration = VarKeyword ~" " VarType ~" " (identifier | bengaliIdentifier) ~" " "=" ~" " Expression ";"
 
     VarKeyword = "ধরি" | "ধ্রুবক" | "চলক"
     VarType = "সংখ্যা" | "হাছামিছা" | "দড়ি" | "বিন্যাস" | "সংখ্যা_বিন্যাস" | "দড়ি_বিন্যাস"
@@ -20,10 +20,18 @@ const banglaGrammar = `
        | digit+                -- withoutDecimal
 
     Boolean = "সত্য" | "মিথ্যা"
-
+    
+    bengaliLetters = "অ" | "আ" | "ই" | "ঈ" | "উ" | "ঊ" | "ঋ" | "এ" | "ঐ" | "ও" | "ঔ" | "ক" | "খ" | "গ" | "ঘ" | "ঙ" | "চ" | "ছ" | "জ" | "ঝ" | "ঞ" 
+          | "ট" | "ঠ" | "ড" | "ঢ" | "ণ" | "ত" | "থ" | "দ" | "ধ" | "ন" | "প" | "ফ" | "ব" | "ভ" | "ম" | "য" | "র" | "ল" | "শ" | "ষ" 
+          | "স" | "হ" | "ক্ষ" | "ড়" | "ঢ়" | "য়" | "ৄ" | "ৢ" | "ৣ" | "ৎ" | "ং" | "ঃ" | "ঁ" | "ঽ" | "অঁ"
+    bengaliDigit = "০" | "১" | "২" | "৩" | "৪" | "৫" | "৬" | "৭" | "৮" | "৯" 
+    bengaliIdentifier = bengaliLetters (bengaliLetters | bengaliDigit | "_")*
+    
     identifier = letter (letter | digit)*
+    
     outputString = "\\"" chars "\\"" -- string 
       | letter (letter | digit)* -- identifier
+      | bengaliLetters (bengaliLetters | bengaliDigit | "_")* -- bengaliIdentifier
   }
 `;
 
@@ -47,12 +55,6 @@ semantics.addOperation('toTS()', {
   },
 
   VariableDeclaration(varKeyword, varType, id, _eq, expr, _semicolon) {
-    // Debugging inside the VariableDeclaration
-    console.log("varKeyword:", varKeyword.sourceString);
-    console.log("varType:", varType.sourceString);
-    console.log("id:", id.sourceString);
-    console.log("expr:", expr.sourceString);
-    return 0;
     const jsKeyword = {
       "ধরি": "let",
       "ধ্রুবক": "const",
@@ -68,12 +70,12 @@ semantics.addOperation('toTS()', {
       "দড়ি_বিন্যাস": "string[]"
     }[varType.sourceString];
 
-    const tsVarName = transliterateBangla(id.sourceString);
-    //const tsExpr = expr.toTS();
-    console.log(`${jsKeyword} ${tsVarName}: ${jsType} = ${expr};`);
-    return 0;
-    // Return the TypeScript variable declaration
-    return `${jsKeyword} ${tsVarName}: ${jsType} = ${expr};`;
+    // Check if the identifier is Bengali or not
+    const tsVarName = (id.sourceString.match(/^[\u0980-\u09FF]+$/)) ? transliterateBangla(id.sourceString) : id.sourceString;
+
+    const tsExpr = expr.toTS();
+
+    return `${jsKeyword} ${tsVarName}: ${jsType} = ${tsExpr};`;
   },
 
   // Handle outputString as either a string literal or an identifier
@@ -81,6 +83,9 @@ semantics.addOperation('toTS()', {
     return `"${chars.sourceString}"`; // Preserve quotes for string output
   },
   outputString_identifier(firstChar, restChars) {
+    return transliterateBangla(firstChar.sourceString + restChars.sourceString);
+  },
+  outputString_bengaliIdentifier(firstChar, restChars) {
     return transliterateBangla(firstChar.sourceString + restChars.sourceString);
   },
 
