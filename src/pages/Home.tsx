@@ -8,7 +8,7 @@ import { CiPlay1, CiUndo } from "react-icons/ci";
 import horizontalLogo from "../assets/images/bs_horizontal_logo.png";
 
 const Home: React.FC = () => {
-  const [editorValue, setEditorValue] = useState<string>('console.log("Hello World!");');
+  const [editorValue, setEditorValue] = useState<string>('দেখাও("Hello World!");');
   const [finalOutput, getOutput] = useState<string>('');
 
   const handleEditorChange = (value: string | undefined) => {
