@@ -1,14 +1,14 @@
 import * as ohm from 'ohm-js';
+import { transliterateBangla } from './utils/transliterate';
 
 // Define the BanglaScript grammar
 const banglaGrammar = `
   BanglaScript {
     Program = Statement*
-    Statement = PrintStatement | VariableDeclaration | AssignmentStatement
+    Statement = PrintStatement | VariableDeclaration
 
     PrintStatement = "দেখাও" "(" outputString ")" ";"
-    VariableDeclaration = VarKeyword VarType identifier "=" Expression ";"
-    AssignmentStatement = identifier "=" Expression ";"
+    VariableDeclaration = VarKeyword ~" " VarType ~" " identifier ~" " "=" ~" " Expression ";"
 
     VarKeyword = "ধরি" | "ধ্রুবক" | "চলক"
     VarType = "সংখ্যা" | "হাছামিছা" | "দড়ি" | "বিন্যাস" | "সংখ্যা_বিন্যাস" | "দড়ি_বিন্যাস"
@@ -46,12 +46,42 @@ semantics.addOperation('toTS()', {
     return `console.log(${str.toTS()});`;
   },
 
+  VariableDeclaration(varKeyword, varType, id, _eq, expr, _semicolon) {
+    // Debugging inside the VariableDeclaration
+    console.log("varKeyword:", varKeyword.sourceString);
+    console.log("varType:", varType.sourceString);
+    console.log("id:", id.sourceString);
+    console.log("expr:", expr.sourceString);
+    return 0;
+    const jsKeyword = {
+      "ধরি": "let",
+      "ধ্রুবক": "const",
+      "চলক": "var"
+    }[varKeyword.sourceString];
+
+    const jsType = {
+      "সংখ্যা": "number",
+      "হাছামিছা": "boolean",
+      "দড়ি": "string",
+      "বিন্যাস": "any[]",
+      "সংখ্যা_বিন্যাস": "number[]",
+      "দড়ি_বিন্যাস": "string[]"
+    }[varType.sourceString];
+
+    const tsVarName = transliterateBangla(id.sourceString);
+    //const tsExpr = expr.toTS();
+    console.log(`${jsKeyword} ${tsVarName}: ${jsType} = ${expr};`);
+    return 0;
+    // Return the TypeScript variable declaration
+    return `${jsKeyword} ${tsVarName}: ${jsType} = ${expr};`;
+  },
+
   // Handle outputString as either a string literal or an identifier
   outputString_string(_openQuote, chars, _closeQuote) {
     return `"${chars.sourceString}"`; // Preserve quotes for string output
   },
   outputString_identifier(firstChar, restChars) {
-    return firstChar.sourceString + restChars.sourceString;
+    return transliterateBangla(firstChar.sourceString + restChars.sourceString);
   },
 
   // String handling (keeping as it is)
@@ -75,9 +105,9 @@ semantics.addOperation('toTS()', {
     return bool.sourceString === "সত্য" ? "true" : "false";
   },
 
-  // Identifier handling
+  // Identifier handling (Transliterate Bangla identifiers)
   identifier(firstChar, restChars) {
-    return firstChar.sourceString + restChars.sourceString;
+    return transliterateBangla(firstChar.sourceString + restChars.sourceString);
   },
 
   // Handling characters in strings
